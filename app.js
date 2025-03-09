@@ -16,6 +16,7 @@ const firebaseConfig = {
 // Inicializando Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+let inventory = [];
 
 // Função para carregar o inventário do Firestore
 async function loadInventoryFromFirestore() {
@@ -120,4 +121,19 @@ document.addEventListener("click", async (event) => {
             await deleteItemFromFirestore(itemToDelete.id);
         }
     }
+});
+
+// Restaurando a navegação entre páginas
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetPage = link.getAttribute('data-page');
+        
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+            if (page.id === targetPage) {
+                page.classList.add('active');
+            }
+        });
+    });
 });
