@@ -1,0 +1,292 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento Farmacêutico de Itens Críticos</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script type="module" src="app.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <svg width="50" height="50" viewBox="0 0 50 50">
+                <rect x="5" y="5" width="40" height="40" rx="5" fill="#e74c3c"/>
+                <path d="M15 25h20M25 15v20" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            <h1>Gerenciamento Farmacêutico</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="nav-link active" data-page="dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-link" data-page="inventory">Estoque</a></li>
+                <li><a href="#" class="nav-link" data-page="register">Cadastro</a></li>
+                <li><a href="#" class="nav-link" data-page="reports">Relatórios</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Dashboard Page -->
+        <section id="dashboard" class="page active">
+            <h2>Dashboard</h2>
+            <div class="dashboard-summary">
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24">
+                            <path fill="#3498db" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Total de Itens</h3>
+                        <p id="total-items">0</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24">
+                            <path fill="#e74c3c" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Itens Críticos</h3>
+                        <p id="critical-items">0</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24">
+                            <path fill="#2ecc71" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Valor em Estoque</h3>
+                        <p id="stock-value">R$ 0,00</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24">
+                            <path fill="#f39c12" d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Compras Recomendadas</h3>
+                        <p id="recommended-purchases">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-charts">
+                <div class="chart-container">
+                    <h3>Distribuição por Categoria</h3>
+                    <canvas id="category-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Valor por Categoria</h3>
+                    <canvas id="value-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Itens Críticos por Categoria</h3>
+                    <canvas id="critical-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Tendência de Consumo</h3>
+                    <canvas id="consumption-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Page -->
+        <section id="inventory" class="page">
+            <h2>Estoque</h2>
+            <div class="filter-container">
+                <div class="search-box">
+                    <input type="text" id="inventory-search" placeholder="Buscar item...">
+                    <button id="search-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="filter-options">
+                    <select id="category-filter">
+                        <option value="all">Todas Categorias</option>
+                        <option value="psicotrópicos">Psicotrópicos</option>
+                        <option value="antibióticos">Antibióticos</option>
+                        <option value="vasoativas">Drogas Vasoativas</option>
+                        <option value="gerais">Medicamentos Gerais</option>
+                        <option value="materiais">Materiais</option>
+                        <option value="dietas">Dietas</option>
+                    </select>
+                    <select id="status-filter">
+                        <option value="all">Todos Status</option>
+                        <option value="normal">Normal</option>
+                        <option value="low">Estoque Baixo</option>
+                        <option value="critical">Crítico</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Estoque Atual</th>
+                            <th>Estoque Mínimo</th>
+                            <th>Consumo Médio/Dia</th>
+                            <th>Dias de Estoque</th>
+                            <th>Valor Unitário</th>
+                            <th>Valor Total</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados serão inseridos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Register Page -->
+        <section id="register" class="page">
+            <h2>Cadastro de Itens</h2>
+            <div class="form-container">
+                <form id="item-form">
+                    <div class="form-group">
+                        <label for="item-code">Código:</label>
+                        <input type="text" id="item-code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-name">Nome:</label>
+                        <input type="text" id="item-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-category">Categoria:</label>
+                        <select id="item-category" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="psicotrópicos">Psicotrópicos</option>
+                            <option value="antibióticos">Antibióticos</option>
+                            <option value="vasoativas">Drogas Vasoativas</option>
+                            <option value="gerais">Medicamentos Gerais</option>
+                            <option value="materiais">Materiais</option>
+                            <option value="dietas">Dietas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-unit">Unidade:</label>
+                        <select id="item-unit" required>
+                            <option value="">Selecione uma unidade</option>
+                            <option value="ampola">Ampola</option>
+                            <option value="comprimido">Comprimido</option>
+                            <option value="frasco">Frasco</option>
+                            <option value="unidade">Unidade</option>
+                            <option value="caixa">Caixa</option>
+                            <option value="ml">Mililitro</option>
+                            <option value="g">Grama</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-stock">Estoque Atual:</label>
+                        <input type="number" id="item-stock" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-min-stock">Estoque Mínimo:</label>
+                        <input type="number" id="item-min-stock" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-daily-consumption">Consumo Médio Diário:</label>
+                        <input type="number" id="item-daily-consumption" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-price">Valor Unitário (R$):</label>
+                        <input type="number" id="item-price" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-supplier">Fornecedor: (opcional)</label>
+                        <input type="text" id="item-supplier">
+                    </div>
+                    <div class="form-group">
+                        <label for="item-description">Descrição: (opcional)</label>
+                        <textarea id="item-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" id="save-item">Salvar</button>
+                        <button type="button" id="clear-form">Limpar</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Reports Page -->
+        <section id="reports" class="page">
+            <h2>Relatórios</h2>
+            <div class="reports-container">
+                <div class="report-options">
+                    <h3>Gerar Relatório</h3>
+                    <div class="form-group">
+                        <label for="report-type">Tipo de Relatório:</label>
+                        <select id="report-type">
+                            <option value="inventory">Inventário Completo</option>
+                            <option value="critical">Itens Críticos</option>
+                            <option value="projection">Projeção de Compras</option>
+                            <option value="consumption">Análise de Consumo</option>
+                            <option value="category">Análise por Categoria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-category">Categoria:</label>
+                        <select id="report-category">
+                            <option value="all">Todas Categorias</option>
+                            <option value="psicotrópicos">Psicotrópicos</option>
+                            <option value="antibióticos">Antibióticos</option>
+                            <option value="vasoativas">Drogas Vasoativas</option>
+                            <option value="gerais">Medicamentos Gerais</option>
+                            <option value="materiais">Materiais</option>
+                            <option value="dietas">Dietas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-period">Período de Projeção:</label>
+                        <select id="report-period">
+                            <option value="30">30 dias</option>
+                            <option value="45">45 dias</option>
+                            <option value="60">60 dias</option>
+                            <option value="90">90 dias</option>
+                        </select>
+                    </div>
+                    <button id="generate-pdf" class="btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Gerar PDF
+                    </button>
+                </div>
+                <div class="report-preview">
+                    <h3>Visualização do Relatório</h3>
+                    <div id="report-container">
+                        <p class="report-placeholder">Selecione as opções e clique em "Gerar PDF" para visualizar o relatório</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        Desenvolvido por: Farm. Fernando Carneiro
+    </footer>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Detalhes do Item</h2>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+</body>
+</html>
