@@ -67,6 +67,7 @@ async function deleteItemFromFirestore(id) {
 document.addEventListener('DOMContentLoaded', () => {
     loadInventoryFromFirestore();
     setupEventListeners();
+    setupNavigation();
 });
 
 // Ajustando a função de envio do formulário para usar Firestore
@@ -124,16 +125,25 @@ document.addEventListener("click", async (event) => {
 });
 
 // Restaurando a navegação entre páginas
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetPage = link.getAttribute('data-page');
-        
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-            if (page.id === targetPage) {
-                page.classList.add('active');
+function setupNavigation() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetPage = link.getAttribute('data-page');
+            
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+                if (page.id === targetPage) {
+                    page.classList.add('active');
+                }
+            });
+            
+            // Garantindo atualização da página correta
+            if (targetPage === 'inventory') {
+                updateInventoryTable();
+            } else if (targetPage === 'dashboard') {
+                updateDashboard();
             }
         });
     });
-});
+}
