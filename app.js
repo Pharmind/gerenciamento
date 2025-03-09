@@ -86,6 +86,30 @@ function setupEventListeners() {
     
     // Gerar PDF
     generatePdfBtn.addEventListener('click', generateReport);
+
+    const menuToggle = document.querySelector('.menu-toggle');
+    const header = document.querySelector('header');
+    const menuOverlay = document.querySelector('.menu-overlay');
+
+    menuToggle.addEventListener('click', () => {
+        header.classList.toggle('active');
+        menuOverlay.classList.toggle('active');
+    });
+
+    menuOverlay.addEventListener('click', () => {
+        header.classList.remove('active');
+        menuOverlay.classList.remove('active');
+    });
+
+    // Close menu when clicking a nav link on mobile
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 992) {
+                header.classList.remove('active');
+                menuOverlay.classList.remove('active');
+            }
+        });
+    });
 }
 
 function handleItemFormSubmit(e) {
